@@ -30,4 +30,20 @@ class User < ApplicationRecord
 	def feed_tweets
 		Tweet.where(user_id: self.following_ids + [self.id])
 	end
+
+	has_many :favorites, dependent: :destroy
+	has_many :favoritings, through: :favorites, source: :tweet
+
+	def favorite(tweet)
+		self.favorites.find_or_create_by(tweet_id: tweet.id)
+	end
+
+	def unfavorite(tweet)
+		favorite = self.favorites.find_by(tweet_id: tweet.id)
+		favorite.destroy if favorite
+	end
+
+	def favoriting?(tweet)
+		self.favoritings.include?(tweet)
+	end
 end
